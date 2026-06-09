@@ -3,7 +3,12 @@
 	"ignorePaths": [],
 	"dictionaryDefinitions": [],
 	"dictionaries": [],
-	"words": ["Atul", "DavideBigano", "Gawande"],
+	"words": [
+		"Atul",
+		"DavideBigano",
+		"Gawande",
+		"skillmancy"
+	],
 	"ignoreWords": [],
 	"import": []
 }
