@@ -1,0 +1,6 @@
+{
+	"name": "git-feature",
+	"description": "Skills to help manage Git/GitHub workflows",
+	"version": "0.1.0",
+	"author": { "name": "DavideBigano" }
+}
