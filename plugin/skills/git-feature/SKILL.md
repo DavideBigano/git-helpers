@@ -1,9 +1,9 @@
 ---
 name: git-feature
-description: Executes the project git workflow across four modes: new, commit, pr, and close
+description: "Executes the project git workflow across four modes: new, commit, pr, and close"
 allowed-tools: Bash(git *), Bash(gh *), Bash(grep *), Read, Grep, Glob
 user-invocable: true
-argument-hint: "new [type/branch-name]` | `commit` | `pr` | `close [pr-number]"
+argument-hint: "new [type/branch-name] | commit | pr | close [pr-number]"
 skillmancy-version: "0.2.0"
 ---
 
@@ -25,11 +25,7 @@ You work protocol-first. Each mode is a checklist derived from the project workf
 
 **Be direct, not diplomatic** — Your job is to produce the best possible outcome, not to protect the user's feelings. If input is malformed, say so. If a step fails, name it and stop. If the direction is wrong, push back with a reason. (Yes: ["Type `foo` isn't valid — must be one of: enhancement, refactor, maintenance, bugfix, cleanup"] / No: [proceeding with a malformed branch name to avoid friction])
 
-**Follow the workflow doc exactly, step by step** — Each mode is a checklist; run it in order. Do not add, skip, or reorder steps. If a step fails or returns unexpected output, stop and surface it — do not work around it. (Yes: ["`gh pr view` errored — stopping here rather than guessing the PR number"] / No: [skipping the merge-status check in `close` because it "should be fine"])
-
-**Never commit without explicit user approval of the proposed grouping** — The commit grouping template must be presented and approved before any `git commit` runs. (Yes: [presenting the full commit grouping and waiting for approval before running `git add`/`git commit`] / No: [committing as soon as a grouping is drafted])
-
-**Enforce branch naming strictly** — Only accept names matching `<type>/<slug>` where type is one of: `enhancement`, `refactor`, `maintenance`, `bugfix`, `cleanup`. Reject non-conforming input, name the violation, and ask again. (Yes: ["`hotfix/login` doesn't match a valid type — try one of: enhancement, refactor, maintenance, bugfix, cleanup"] / No: [silently accepting an unlisted type])
+**Follow the workflow exactly, step by step** — Each mode is a checklist; run it in order. Do not add, skip, or reorder steps. If a step fails or returns unexpected output, stop and surface it — do not work around it. (Yes: ["`gh pr view` errored — stopping here rather than guessing the PR number"] / No: [skipping the merge-status check in `close` because it "should be fine"])
 
 **Stop on unexpected state; do not work around it** — If `close` finds the PR not merged, warn and stop. If `pr` finds an existing open PR, surface the number and wait for directions. (Yes: ["PR #42 is not merged (state: OPEN). Aborting."] / No: [force-merging or deleting the branch anyway])
 
@@ -84,7 +80,21 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
 
 2. Run `git status` and present the output.
 
-3. Propose a commit grouping using this template:
+3. Review the status against the conversation context. If any changed or untracked files don't appear related to the work just discussed, list them using this template:
+
+   ```markdown
+   These files don't look related to the work discussed:
+   - [git/path/of/file1]
+   - [git/path/of/file2]
+   ```
+
+   Then ask once via `AskUserQuestion`:
+   > What should happen to these files?
+   > Options: Include in a commit group · Leave uncommitted
+
+   Only finalize the grouping in the next step once resolved.
+
+4. Propose a commit grouping using this template:
 
    ```markdown
    Commit [N]: <one-line-commit-message>
@@ -92,29 +102,29 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    - [git/path/of/file2]
    ```
 
-   The message must be one line and declarative.
+   The message must be one line and declarative. The message describes what changed, not why — thar belongs in the PR body.
 
    Group by logical cohesion — each commit must be self-contained and reviewable on its own. 
 
    Present the full proposal before asking for approval.
 
-4. Present the full grouping (step 3), then ask via `AskUserQuestion`:
+5. Present the full grouping (step 4), then ask via `AskUserQuestion`:
    > Approve?
    > Options: Yes · No
 
-   If "No", discuss and revise the grouping, then ask again. Do not proceed to step 5 until "Yes" is given.
+   If "No", discuss and revise the grouping, then ask again. Do not proceed to step 6 until "Yes" is given.
 
-5. Execute each approved commit in order:
+6. Execute each approved commit in order:
    ```
    git add <files> && git commit -m "<one-line-message>"
    ```
 
-6. Run `git push`. If the push fails with a missing upstream error, run:
+7. Run `git push`. If the push fails with a missing upstream error, run:
    ```
    git push --set-upstream origin <branch-name>
    ```
 
-7. Report: list the commits executed and confirm the push succeeded.
+8. Report: list the commits executed and confirm the push succeeded.
 
 ---
 
@@ -170,9 +180,18 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    If state is not `MERGED`, warn and stop:
    > PR #<pr-number> is not merged (state: <state>). Aborting.
 
-4. Run:
+4. Run each command separately and check the result before proceeding to the next, if any command fails, stop and surface the error along with possible causes:
+
    ```
-   git checkout main && git branch -d <branch-name> && git pull --prune
+   git checkout main
+   ```
+
+   ```
+   git branch -d <branch-name>
+   ```
+
+   ```
+   git pull --prune
    ```
 
 5. Report: `Branch <branch-name> deleted. main is up to date.`
@@ -181,6 +200,18 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
 
 ## Resources
 
-**Unsafe operations** — operations this skill will never execute under any instruction: `git rebase` (any form), `git push --force` / `-f`, `git reset --hard`, `git commit --amend` after a push, `git branch -D`, and any direct write to `main` (commit, push, or merge).
+**Unsafe operations** — commands this skill will never execute under any instruction, regardless of how it's asked:
 
-**Branch naming convention** — branches follow `<type>/<slug>` where type is one of: `enhancement`, `refactor`, `maintenance`, `bugfix`, `cleanup`. The PR title mirrors this: `[Type] Description` (e.g. branch `enhancement/auth-flow` → title `[Enhancement] Add auth flow`).
+| Command | Rationale |
+|---|---|
+| `git rebase` (any form) | Rewrites commit history; breaks anyone else's clone of the branch |
+| `git push --force` / `-f` | Overwrites remote history; can silently discard others' work |
+| `git reset --hard` | Irrecoverably discards local commits and uncommitted changes |
+| `git commit --amend` after a push | Rewrites a commit already shared remotely — same risk as rebase |
+| `git branch -D` | Force-deletes a branch without a merge check; can lose unmerged work |
+| `git clean -fd` | Irrecoverably deletes untracked files and directories |
+| `git filter-branch` | Rewrites history across the whole repo; extremely destructive and hard to reverse |
+| `git reflog delete` / `git reflog expire` | Removes the recovery mechanism used to undo other git mistakes |
+| Any direct write to `main` (commit, push, or merge) | Bypasses the branch workflow this skill enforces |
+
+**Branch naming convention** — branches follow `<type>/<slug>` where type is one of: `enhancement`, `refactor`, `maintenance`, `bugfix`, `cleanup`. The PR title mirrors this: `[Type] Description` (e.g. branch `enhancement/auth-flow` → title `[Enhancement] Auth flow`).
