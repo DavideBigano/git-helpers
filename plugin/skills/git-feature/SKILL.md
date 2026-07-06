@@ -92,7 +92,7 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    > What should happen to these files?
    > Options: Include in a commit group · Leave uncommitted
 
-   Only finalize the grouping in the next step once resolved.
+   If the user gives corrections, revise the list accordingly, present it again, then ask again. Only finalize the grouping in the next step once resolved.
 
 4. Propose a commit grouping using this template:
 
@@ -112,7 +112,7 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    > Approve?
    > Options: Yes · No
 
-   If "No", discuss and revise the grouping, then ask again. Do not proceed to step 6 until "Yes" is given.
+   If "No", or if the user gives corrections, revise the grouping accordingly, present the full revised grouping again, then ask again. Do not proceed to step 6 until "Yes" is given.
 
 6. Execute each approved commit in order:
    ```
@@ -148,7 +148,7 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    > Approve?
    > Options: Yes · No
 
-   If "No", discuss and revise the draft, then ask again. Do not run `gh pr create` until "Yes" is given.
+   If "No", or if the user gives corrections, revise the draft accordingly, present the full revised title and body again, then ask again. Do not run `gh pr create` until "Yes" is given.
 
 5. Run:
    ```
