@@ -16,7 +16,7 @@ If needed provide supplemental material for clarity, like images for graphical c
 ## Change
 
 <!--
-Description of the chages provided in this PR. Don't go too much in depth. Provide a list of the sub-features implemented. Don't provide reasons for the change, that's for the `## Reasons for change` section. 
+Description of the changes provided in this PR. Don't go too much in depth. Provide a list of the sub-features implemented. Don't provide reasons for the change, that's for the `## Reasons for change` section. 
 If needed provide supplemental material for clarity, like images for graphical changes or graphs for architectural ones.
 -->
 
