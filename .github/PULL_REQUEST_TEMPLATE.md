@@ -22,9 +22,5 @@ If needed provide supplemental material for clarity, like images for graphical c
 
 ### Checklist
 
-<!--
-This section is still a stub and will be enhanced in the future
--->
-
 - [ ] Tests
 - [ ] Documentation
