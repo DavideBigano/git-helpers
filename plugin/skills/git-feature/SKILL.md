@@ -142,7 +142,10 @@ If a mode's steps stop early (an approval gate isn't cleared, `pr` finds an exis
    - If a number is returned: display `PR #<number> already exists for this branch.` and wait for directions. Do not proceed until instructed.
    - If output indicates no PR found: proceed.
 
-3. Read `.github/PULL_REQUEST_TEMPLATE.md` using path `.github/PULL_REQUEST_TEMPLATE.md` from the repo root.
+3. Resolve which PR template to use for the pr body, automatically — do not ask the user:
+   - Check for `gitFeature.config.json` at the repo root (`glob gitFeature.config.json`).
+   - If it exists and defines a `prTemplate` property with a file path, read it.
+   - Otherwise, read the packaged default template at `../../references/PULL_REQUEST_TEMPLATE.md` (relative to this skill's own directory).
 
 4. Infer the PR type from the branch name using the branch naming convention (e.g. `enhancement/auth-flow` → `[Enhancement]`). Draft the full PR title and body following the template structure. Present both, then ask via `AskUserQuestion`:
    > Approve?
