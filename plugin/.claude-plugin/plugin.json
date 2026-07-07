@@ -1,6 +1,6 @@
 {
 	"name": "git-helpers",
 	"description": "Skills to help manage Git/GitHub workflows",
-	"version": "0.1.0",
-	"author": { "name": "DavideBigano" }
+	"version": "1.0.0",
+	"author": { "name": "Davide Bigano" }
 }
